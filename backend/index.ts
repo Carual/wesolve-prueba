@@ -38,7 +38,6 @@ function requireAuth(req: Request, res: Response, next: NextFunction) {
 	try {
 		const payload = jwt.verify(token, JWT_SECRET) as JwtPayload
 		if (!payload?.sub || !isUuid(payload.sub)) return res.status(401).json({ error: 'Invalid token payload' })
-
 		;(req as any).userId = payload.sub
 		next()
 	} catch {
@@ -217,16 +216,16 @@ app.get('/problems/:id/users', async (req, res) => {
  * GET /me/matches (requires bearer)
  * Returns the authenticated user's matched problems including role + matched_at.
  */
-app.get("/me/matches", requireAuth, async (req, res) => {
-  const userId = getUserId(req);
+app.get('/me/matches', requireAuth, async (req, res) => {
+	const userId = getUserId(req)
 
-  const limit = Math.min(Number(req.query.limit ?? 200), 500);
+	const limit = Math.min(Number(req.query.limit ?? 200), 500)
 
-  // Requires FK: problem_matches.problem_id -> problems.id
-  const { data, error } = await supabase
-    .from("problem_matches")
-    .select(
-      `
+	// Requires FK: problem_matches.problem_id -> problems.id
+	const { data, error } = await supabase
+		.from('problem_matches')
+		.select(
+			`
       role,
       created_at,
       problems (
@@ -238,40 +237,40 @@ app.get("/me/matches", requireAuth, async (req, res) => {
         country_code,
         created_at
       )
-    `
-    )
-    .eq("user_id", userId)
-    .order("created_at", { ascending: false })
-    .limit(limit);
+    `,
+		)
+		.eq('user_id', userId)
+		.order('created_at', { ascending: false })
+		.limit(limit)
 
-  if (error) return res.status(500).json({ error: error.message });
+	if (error) return res.status(500).json({ error: error.message })
 
-  const items = (data ?? [])
-    .filter((r: any) => r.problems)
-    .map((r: any) => ({
-      role: r.role,
-      matched_at: r.created_at,
-      problem: {
-        id: r.problems.id,
-        title: r.problems.title,
-        description: r.problems.description,
-        category: r.problems.category,
-        location: r.problems.location,
-        country_code: r.problems.country_code,
-        created_at: r.problems.created_at,
-      },
-    }));
+	const items = (data ?? [])
+		.filter((r: any) => r.problems)
+		.map((r: any) => ({
+			role: r.role,
+			matched_at: r.created_at,
+			problem: {
+				id: r.problems.id,
+				title: r.problems.title,
+				description: r.problems.description,
+				category: r.problems.category,
+				location: r.problems.location,
+				country_code: r.problems.country_code,
+				created_at: r.problems.created_at,
+			},
+		}))
 
-  res.json({ items });
-});
+	res.json({ items })
+})
 
 // Serve /public/*
-app.use(express.static(path.join(process.cwd(), "public")));
+app.use(express.static(path.join(process.cwd(), 'public')))
 
 // Serve the UI at /
-app.get("/", (_req, res) => {
-  res.sendFile(path.join(process.cwd(), "public", "index.html"));
-});
+app.get('/', (_req, res) => {
+	res.sendFile(path.join(process.cwd(), 'public', 'index.html'))
+})
 
 // Fallback error handler
 app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
@@ -280,6 +279,4 @@ app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
 })
 
 const PORT = process.env.PORT ? Number(process.env.PORT) : 3001
-//app.listen(PORT, () => console.log(`API running on http://localhost:${PORT}`))
-
-export default app
+app.listen(PORT, () => console.log(`API running on http://localhost:${PORT}`))
