@@ -11,7 +11,7 @@
         .scroll {
             overflow: auto;
             scrollbar-width: thin;
-            scrollbar-color: rgba(148, 163, 184, .55) rgba(15, 23, 42, .35);
+            scrollbar-color: rgba(148, 163, 184, .60) rgba(2, 6, 23, .35);
         }
 
         .scroll::-webkit-scrollbar {
@@ -20,18 +20,18 @@
         }
 
         .scroll::-webkit-scrollbar-track {
-            background: rgba(15, 23, 42, .35);
+            background: rgba(2, 6, 23, .35);
             border-radius: 999px;
         }
 
         .scroll::-webkit-scrollbar-thumb {
-            background: rgba(148, 163, 184, .45);
-            border: 2px solid rgba(15, 23, 42, .35);
+            background: linear-gradient(180deg, rgba(148, 163, 184, .55), rgba(148, 163, 184, .35));
+            border: 2px solid rgba(2, 6, 23, .35);
             border-radius: 999px;
         }
 
         .scroll::-webkit-scrollbar-thumb:hover {
-            background: rgba(148, 163, 184, .65);
+            background: linear-gradient(180deg, rgba(148, 163, 184, .75), rgba(148, 163, 184, .55));
         }
     </style>
 </head>
@@ -51,17 +51,10 @@
             <div class="rounded-2xl border border-slate-800 bg-slate-900/40">
                 <div class="p-4 border-b border-slate-800">
                     <div class="text-sm font-semibold">Session</div>
-                    <div class="text-xs text-slate-400 mt-1">JWT in localStorage → Authorization: Bearer</div>
+                    <div class="text-xs text-slate-400 mt-1">Same-origin API (no localhost), JWT in localStorage</div>
                 </div>
 
                 <div class="p-4 space-y-3">
-                    <div>
-                        <label class="text-xs text-slate-400">API Base URL</label>
-                        <input id="baseUrl"
-                            class="mt-1 w-full rounded-xl bg-slate-950/50 border border-slate-800 px-3 py-2 text-sm"
-                            value="http://localhost:3001" />
-                    </div>
-
                     <div class="grid grid-cols-3 gap-2">
                         <button id="btnPing"
                             class="rounded-xl border border-slate-800 bg-slate-800/50 px-3 py-2 text-sm font-semibold">Ping</button>
@@ -80,7 +73,6 @@
                             class="mt-2 w-full rounded-xl border border-emerald-800/60 bg-emerald-900/20 px-3 py-2 text-sm font-semibold">
                             Login
                         </button>
-
                         <div class="text-xs text-slate-400 mt-2">Token:</div>
                         <div id="tokenPreview" class="text-xs break-all text-slate-300 mt-1 font-mono">—</div>
                     </div>
@@ -93,7 +85,7 @@
                         <button id="btnUsers"
                             class="rounded-xl border border-slate-800 bg-slate-800/50 px-3 py-2 text-sm font-semibold">Refresh</button>
                     </div>
-                    <div id="usersList" class="scroll max-h-[360px] pr-1 space-y-2"></div>
+                    <div id="usersList" class="scroll max-h-[340px] pr-1 space-y-2"></div>
 
                     <div class="flex items-center justify-between pt-2">
                         <div>
@@ -158,7 +150,6 @@
         </div>
     </div>
 
-    <!-- Toasts -->
     <div id="toasts" class="fixed bottom-4 right-4 space-y-2 z-50"></div>
 
     <script>
@@ -166,305 +157,237 @@
         const LS_TOKEN = "wesolve_token", LS_UID = "wesolve_uid";
 
         const state = {
-            baseUrl: $("baseUrl").value.trim(),
+            baseUrl: window.location.origin, // ✅ no localhost
             token: localStorage.getItem(LS_TOKEN) || "",
             userId: localStorage.getItem(LS_UID) || "",
             problems: [],
             myMatches: new Map(), // problemId -> { role, matched_at, problem }
         };
 
-        const escapeHtml = (s) => String(s).replace(/[&<>"']/g, c => ({
+        const esc = (s) => String(s).replace(/[&<>"']/g, c => ({
             "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
         })[c]);
 
         function toast(kind, title, msg) {
             const wrap = $("toasts");
-            const cls = kind === "ok"
-                ? "border-emerald-800/60 bg-emerald-900/20"
-                : kind === "bad"
-                    ? "border-rose-800/60 bg-rose-900/20"
+            const cls = kind === "ok" ? "border-emerald-800/60 bg-emerald-900/20"
+                : kind === "bad" ? "border-rose-800/60 bg-rose-900/20"
                     : "border-slate-700 bg-slate-800/60";
             const el = document.createElement("div");
             el.className = `w-[360px] max-w-[calc(100vw-2rem)] rounded-xl border ${cls} p-3 shadow-lg`;
-            el.innerHTML = `
-      <div class="flex items-start gap-2">
-        <div class="flex-1">
-          <div class="text-sm font-semibold">${escapeHtml(title)}</div>
-          ${msg ? `<div class="text-xs text-slate-200/80 mt-1 break-words">${escapeHtml(msg)}</div>` : ""}
-        </div>
-        <button class="text-slate-300 hover:text-white text-lg leading-none px-2">×</button>
-      </div>`;
+            el.innerHTML = `<div class="flex items-start gap-2">
+      <div class="flex-1">
+        <div class="text-sm font-semibold">${esc(title)}</div>
+        ${msg ? `<div class="text-xs text-slate-200/80 mt-1 break-words">${esc(msg)}</div>` : ""}
+      </div>
+      <button class="text-slate-300 hover:text-white text-lg leading-none px-2">×</button>
+    </div>`;
             el.querySelector("button").onclick = () => el.remove();
-            wrap.appendChild(el);
-            setTimeout(() => el.isConnected && el.remove(), 4200);
+            wrap.appendChild(el); setTimeout(() => el.isConnected && el.remove(), 3800);
         }
 
-        const apiUrl = (path) => state.baseUrl.replace(/\/+$/, "") + path;
+        const url = (p) => state.baseUrl.replace(/\/+$/, "") + p;
 
-        async function apiFetch(path, { method = "GET", body = null } = {}, authed = false) {
+        async function api(p, { method = "GET", body = null } = {}, authed = false) {
             const headers = { "Content-Type": "application/json" };
-            if (authed) {
-                if (!state.token) throw new Error("No token. Login first.");
-                headers.Authorization = "Bearer " + state.token;
-            }
-            const res = await fetch(apiUrl(path), { method, headers, body: body ? JSON.stringify(body) : null });
-            const text = await res.text();
-            let json = null; try { json = text ? JSON.parse(text) : null; } catch { }
+            if (authed) { if (!state.token) throw new Error("No token. Login first."); headers.Authorization = "Bearer " + state.token; }
+            const res = await fetch(url(p), { method, headers, body: body ? JSON.stringify(body) : null });
+            const text = await res.text(); let json = null; try { json = text ? JSON.parse(text) : null } catch { }
             if (!res.ok) throw new Error((json && json.error) ? json.error : (text || res.statusText));
             return json;
         }
 
-        function setBadges() {
+        function badges() {
             $("sessionBadge").textContent = state.token ? `Logged: ${state.userId?.slice(0, 8)}…` : "Not logged";
             $("tokenPreview").textContent = state.token || "—";
         }
 
         function qProblems() {
             const p = new URLSearchParams();
-            const s = $("fSearch").value.trim();
-            const c = $("fCategory").value.trim();
-            const l = $("fLocation").value.trim();
-            const cc = $("fCountry").value.trim().toUpperCase();
-            if (s) p.set("search", s);
-            if (c) p.set("category", c);
-            if (l) p.set("location", l);
-            if (cc) p.set("country_code", cc);
-            const qs = p.toString();
-            return qs ? `?${qs}` : "";
+            const s = $("fSearch").value.trim(), c = $("fCategory").value.trim(), l = $("fLocation").value.trim(), cc = $("fCountry").value.trim().toUpperCase();
+            if (s) p.set("search", s); if (c) p.set("category", c); if (l) p.set("location", l); if (cc) p.set("country_code", cc);
+            const qs = p.toString(); return qs ? `?${qs}` : "";
         }
 
         async function ping() {
-            try { await apiFetch("/health"); $("apiBadge").textContent = "API: OK"; }
+            try { await api("/health"); $("apiBadge").textContent = "API: OK"; }
             catch { $("apiBadge").textContent = "API: FAIL"; }
         }
 
-        // -------- USERS
         async function loadUsers() {
             const list = $("usersList");
             list.innerHTML = `<div class="rounded-xl border border-slate-800 bg-slate-950/30 p-3 text-xs text-slate-400">Loading…</div>`;
             try {
-                const data = await apiFetch("/users");
-                const items = data.items || [];
+                const d = await api("/users"); const items = d.items || [];
                 list.innerHTML = items.length ? "" : `<div class="rounded-xl border border-slate-800 bg-slate-950/30 p-3 text-xs text-slate-400">No users.</div>`;
                 for (const u of items) {
                     const el = document.createElement("div");
                     el.className = "rounded-xl border border-slate-800 bg-slate-950/30 p-3";
-                    el.innerHTML = `
-          <div class="flex items-start justify-between gap-2">
-            <div class="min-w-0">
-              <div class="text-sm font-semibold truncate">${escapeHtml(u.display_name || "Unnamed")}</div>
-              <div class="text-xs text-slate-400 font-mono break-all mt-1">${escapeHtml(u.id)}</div>
-            </div>
-            <button class="shrink-0 rounded-xl border border-slate-800 bg-slate-800/50 px-3 py-2 text-xs font-semibold">Use</button>
-          </div>`;
+                    el.innerHTML = `<div class="flex items-start justify-between gap-2">
+          <div class="min-w-0">
+            <div class="text-sm font-semibold truncate">${esc(u.display_name || "Unnamed")}</div>
+            <div class="text-xs text-slate-400 font-mono break-all mt-1">${esc(u.id)}</div>
+          </div>
+          <button class="shrink-0 rounded-xl border border-slate-800 bg-slate-800/50 px-3 py-2 text-xs font-semibold">Use</button>
+        </div>`;
                     el.querySelector("button").onclick = () => { $("loginUserId").value = u.id; toast("ok", "User selected", ""); };
                     list.appendChild(el);
                 }
-            } catch (e) {
-                list.innerHTML = `<div class="rounded-xl border border-rose-800/60 bg-rose-900/20 p-3 text-xs">${escapeHtml(e.message)}</div>`;
-            }
+            } catch (e) { list.innerHTML = `<div class="rounded-xl border border-rose-800/60 bg-rose-900/20 p-3 text-xs">${esc(e.message)}</div>`; }
         }
 
-        // -------- AUTH
         async function login() {
             const userId = $("loginUserId").value.trim();
             if (!userId) return toast("bad", "Missing userId", "Pick one from Users list.");
             try {
-                const data = await apiFetch("/login", { method: "POST", body: { userId } });
-                state.token = data.token || "";
-                state.userId = data.user?.id || userId;
-                localStorage.setItem(LS_TOKEN, state.token);
-                localStorage.setItem(LS_UID, state.userId);
-                setBadges();
-                toast("ok", "Logged in", data.user?.display_name || state.userId);
+                const d = await api("/login", { method: "POST", body: { userId } });
+                state.token = d.token || ""; state.userId = d.user?.id || userId;
+                localStorage.setItem(LS_TOKEN, state.token); localStorage.setItem(LS_UID, state.userId);
+                badges(); toast("ok", "Logged in", d.user?.display_name || state.userId);
                 await loadMyMatches();
-            } catch (e) {
-                toast("bad", "Login failed", e.message);
-            }
+            } catch (e) { toast("bad", "Login failed", e.message); }
         }
 
         function logout() {
             state.token = ""; state.userId = "";
             localStorage.removeItem(LS_TOKEN); localStorage.removeItem(LS_UID);
-            state.myMatches.clear();
-            setBadges();
-            renderMyMatches();
+            state.myMatches.clear(); badges(); renderMyMatches();
             toast("ok", "Logged out", "");
         }
 
         async function me() {
-            try {
-                const data = await apiFetch("/me", {}, true);
-                toast("ok", "/me", `${data.user.display_name || "Unnamed"}`);
-            } catch (e) {
-                toast("bad", "/me failed", e.message);
-            }
+            try { const d = await api("/me", {}, true); toast("ok", "/me", d.user?.display_name || "ok"); }
+            catch (e) { toast("bad", "/me failed", e.message); }
         }
 
-        // -------- MY MATCHES (NEW: server-driven)
         async function loadMyMatches() {
             const box = $("myMatchesList");
-            if (!state.token) { renderMyMatches(); return; }
+            if (!state.token) return renderMyMatches();
             box.innerHTML = `<div class="rounded-xl border border-slate-800 bg-slate-950/30 p-3 text-xs text-slate-400">Loading…</div>`;
             try {
-                const data = await apiFetch("/me/matches?limit=300", {}, true);
+                const d = await api("/me/matches?limit=300", {}, true);
                 state.myMatches.clear();
-                for (const r of (data.items || [])) {
-                    state.myMatches.set(r.problem.id, { role: r.role, matched_at: r.matched_at, problem: r.problem });
-                }
-                renderMyMatches();
-                renderProblems(); // update chips
-            } catch (e) {
-                box.innerHTML = `<div class="rounded-xl border border-rose-800/60 bg-rose-900/20 p-3 text-xs">${escapeHtml(e.message)}</div>`;
-            }
+                for (const r of (d.items || [])) state.myMatches.set(r.problem.id, { role: r.role, matched_at: r.matched_at, problem: r.problem });
+                renderMyMatches(); renderProblems();
+            } catch (e) { box.innerHTML = `<div class="rounded-xl border border-rose-800/60 bg-rose-900/20 p-3 text-xs">${esc(e.message)}</div>`; }
         }
 
         function renderMyMatches() {
-            const box = $("myMatchesList");
-            box.innerHTML = "";
-            if (!state.token) {
-                box.innerHTML = `<div class="rounded-xl border border-slate-800 bg-slate-950/30 p-3 text-xs text-slate-400">Login to see matches.</div>`;
-                return;
-            }
-            const items = Array.from(state.myMatches.values());
-            if (!items.length) {
-                box.innerHTML = `<div class="rounded-xl border border-slate-800 bg-slate-950/30 p-3 text-xs text-slate-400">No matches.</div>`;
-                return;
-            }
+            const box = $("myMatchesList"); box.innerHTML = "";
+            if (!state.token) return box.innerHTML = `<div class="rounded-xl border border-slate-800 bg-slate-950/30 p-3 text-xs text-slate-400">Login to see matches.</div>`;
+            const items = [...state.myMatches.values()];
+            if (!items.length) return box.innerHTML = `<div class="rounded-xl border border-slate-800 bg-slate-950/30 p-3 text-xs text-slate-400">No matches.</div>`;
             for (const m of items) {
                 const p = m.problem;
                 const el = document.createElement("div");
                 el.className = "rounded-xl border border-slate-800 bg-slate-950/30 p-3";
-                el.innerHTML = `
-        <div class="flex items-start justify-between gap-2">
-          <div class="min-w-0">
-            <div class="text-sm font-semibold">${escapeHtml(p.title)}</div>
-            <div class="text-xs text-slate-400 mt-1 flex flex-wrap gap-2">
-              <span class="px-2 py-1 rounded-full border border-slate-800 bg-slate-800/50">${escapeHtml(m.role)}</span>
-              <span class="px-2 py-1 rounded-full border border-slate-800 bg-slate-800/50">📍 ${escapeHtml(p.location)}</span>
-            </div>
-            <div class="text-[11px] text-slate-500 font-mono break-all mt-2">${escapeHtml(p.id)}</div>
+                el.innerHTML = `<div class="flex items-start justify-between gap-2">
+        <div class="min-w-0">
+          <div class="text-sm font-semibold">${esc(p.title)}</div>
+          <div class="text-xs text-slate-400 mt-1 flex flex-wrap gap-2">
+            <span class="px-2 py-1 rounded-full border border-slate-800 bg-slate-800/50">${esc(m.role)}</span>
+            <span class="px-2 py-1 rounded-full border border-slate-800 bg-slate-800/50">📍 ${esc(p.location)}</span>
           </div>
-          <div class="shrink-0 flex flex-col gap-2">
-            <button data-act="users" class="rounded-xl border border-slate-800 bg-slate-800/50 px-3 py-2 text-xs font-semibold">Users</button>
-            <button data-act="unmatch" class="rounded-xl border border-rose-800/60 bg-rose-900/20 px-3 py-2 text-xs font-semibold">Unmatch</button>
-          </div>
-        </div>`;
-                el.querySelector('[data-act="users"]').onclick = () => loadCollaborators(p.id);
-                el.querySelector('[data-act="unmatch"]').onclick = () => unmatch(p);
+        </div>
+        <div class="shrink-0 flex flex-col gap-2">
+          <button data-u class="rounded-xl border border-slate-800 bg-slate-800/50 px-3 py-2 text-xs font-semibold">Users</button>
+          <button data-x class="rounded-xl border border-rose-800/60 bg-rose-900/20 px-3 py-2 text-xs font-semibold">Unmatch</button>
+        </div>
+      </div>`;
+                el.querySelector("[data-u]").onclick = () => loadCollaborators(p.id);
+                el.querySelector("[data-x]").onclick = () => unmatch(p);
                 box.appendChild(el);
             }
         }
 
-        // -------- PROBLEMS
         async function loadProblems() {
             const list = $("problemsList");
             list.innerHTML = `<div class="rounded-xl border border-slate-800 bg-slate-950/30 p-3 text-xs text-slate-400">Loading…</div>`;
             try {
-                const data = await apiFetch("/problems" + qProblems());
-                state.problems = data.items || [];
+                const d = await api("/problems" + qProblems());
+                state.problems = d.items || [];
                 $("resultsMeta").textContent = `${state.problems.length} problems`;
                 renderProblems();
             } catch (e) {
-                list.innerHTML = `<div class="rounded-xl border border-rose-800/60 bg-rose-900/20 p-3 text-xs">${escapeHtml(e.message)}</div>`;
+                list.innerHTML = `<div class="rounded-xl border border-rose-800/60 bg-rose-900/20 p-3 text-xs">${esc(e.message)}</div>`;
                 $("resultsMeta").textContent = "Error";
             }
         }
 
         function renderProblems() {
-            const list = $("problemsList");
-            list.innerHTML = "";
-            if (!state.problems.length) {
-                list.innerHTML = `<div class="rounded-xl border border-slate-800 bg-slate-950/30 p-3 text-xs text-slate-400">No results.</div>`;
-                return;
-            }
+            const list = $("problemsList"); list.innerHTML = "";
+            if (!state.problems.length) return list.innerHTML = `<div class="rounded-xl border border-slate-800 bg-slate-950/30 p-3 text-xs text-slate-400">No results.</div>`;
             for (const p of state.problems) {
                 const my = state.myMatches.get(p.id);
                 const el = document.createElement("div");
                 el.className = "rounded-xl border border-slate-800 bg-slate-950/30 p-3";
-                el.innerHTML = `
-        <div class="flex items-start justify-between gap-2">
-          <div class="min-w-0">
-            <div class="text-sm font-semibold">${escapeHtml(p.title)}</div>
-            <div class="text-xs text-slate-400 mt-1 flex flex-wrap gap-2">
-              <span class="px-2 py-1 rounded-full border border-slate-800 bg-slate-800/50">🏷 ${escapeHtml(p.category)}</span>
-              <span class="px-2 py-1 rounded-full border border-slate-800 bg-slate-800/50">📍 ${escapeHtml(p.location)}</span>
-              <span class="px-2 py-1 rounded-full border border-slate-800 bg-slate-800/50">🌍 ${escapeHtml(p.country_code || "—")}</span>
-              ${my ? `<span class="px-2 py-1 rounded-full border border-emerald-800/60 bg-emerald-900/20">🙋 You: ${escapeHtml(my.role)}</span>` : ``}
-            </div>
-            <div class="text-xs text-slate-300 mt-2">${escapeHtml((p.description || "").slice(0, 140))}${(p.description || "").length > 140 ? "…" : ""}</div>
-            <div class="text-[11px] text-slate-500 font-mono break-all mt-2">${escapeHtml(p.id)}</div>
+                el.innerHTML = `<div class="flex items-start justify-between gap-2">
+        <div class="min-w-0">
+          <div class="text-sm font-semibold">${esc(p.title)}</div>
+          <div class="text-xs text-slate-400 mt-1 flex flex-wrap gap-2">
+            <span class="px-2 py-1 rounded-full border border-slate-800 bg-slate-800/50">🏷 ${esc(p.category)}</span>
+            <span class="px-2 py-1 rounded-full border border-slate-800 bg-slate-800/50">📍 ${esc(p.location)}</span>
+            ${my ? `<span class="px-2 py-1 rounded-full border border-emerald-800/60 bg-emerald-900/20">🙋 ${esc(my.role)}</span>` : ""}
           </div>
-          <div class="shrink-0 flex flex-col gap-2">
-            <button data-act="users" class="rounded-xl border border-slate-800 bg-slate-800/50 px-3 py-2 text-xs font-semibold">Users</button>
-            <button data-act="solver" class="rounded-xl border border-emerald-800/60 bg-emerald-900/20 px-3 py-2 text-xs font-semibold">Match SOLVER</button>
-            <button data-act="aff" class="rounded-xl border border-emerald-800/60 bg-emerald-900/20 px-3 py-2 text-xs font-semibold">Match AFFECTED</button>
-            <button data-act="unmatch" class="rounded-xl border border-rose-800/60 bg-rose-900/20 px-3 py-2 text-xs font-semibold">Unmatch</button>
-          </div>
-        </div>`;
-                el.querySelector('[data-act="users"]').onclick = () => loadCollaborators(p.id);
-                el.querySelector('[data-act="solver"]').onclick = () => match(p, "SOLVER");
-                el.querySelector('[data-act="aff"]').onclick = () => match(p, "AFFECTED");
-                el.querySelector('[data-act="unmatch"]').onclick = () => unmatch(p);
+          <div class="text-xs text-slate-300 mt-2">${esc((p.description || "").slice(0, 120))}${(p.description || "").length > 120 ? "…" : ""}</div>
+        </div>
+        <div class="shrink-0 flex flex-col gap-2">
+          <button data-u class="rounded-xl border border-slate-800 bg-slate-800/50 px-3 py-2 text-xs font-semibold">Users</button>
+          <button data-s class="rounded-xl border border-emerald-800/60 bg-emerald-900/20 px-3 py-2 text-xs font-semibold">Match SOLVER</button>
+          <button data-a class="rounded-xl border border-emerald-800/60 bg-emerald-900/20 px-3 py-2 text-xs font-semibold">Match AFFECTED</button>
+          <button data-x class="rounded-xl border border-rose-800/60 bg-rose-900/20 px-3 py-2 text-xs font-semibold">Unmatch</button>
+        </div>
+      </div>`;
+                el.querySelector("[data-u]").onclick = () => loadCollaborators(p.id);
+                el.querySelector("[data-s]").onclick = () => match(p, "SOLVER");
+                el.querySelector("[data-a]").onclick = () => match(p, "AFFECTED");
+                el.querySelector("[data-x]").onclick = () => unmatch(p);
                 list.appendChild(el);
             }
         }
 
         async function match(p, role) {
             try {
-                await apiFetch(`/problems/${p.id}/match`, { method: "POST", body: { role } }, true);
+                await api(`/problems/${p.id}/match`, { method: "POST", body: { role } }, true);
                 toast("ok", "Matched ✅", `${p.title} — ${role}`);
-                await loadMyMatches();
-                await loadProblems();
-            } catch (e) {
-                toast("bad", "Match failed", e.message);
-            }
+                await loadMyMatches(); await loadProblems();
+            } catch (e) { toast("bad", "Match failed", e.message); }
         }
 
         async function unmatch(p) {
             try {
-                await apiFetch(`/problems/${p.id}/match`, { method: "DELETE" }, true);
+                await api(`/problems/${p.id}/match`, { method: "DELETE" }, true);
                 toast("ok", "Unmatched", p.title);
-                await loadMyMatches();
-                await loadProblems();
-                if ($("collabBadge").textContent !== "Select") await loadCollaborators(p.id).catch(() => { });
-            } catch (e) {
-                toast("bad", "Unmatch failed", e.message);
-            }
+                await loadMyMatches(); await loadProblems();
+            } catch (e) { toast("bad", "Unmatch failed", e.message); }
         }
 
-        // -------- COLLABORATORS
         async function loadCollaborators(problemId) {
             $("collabBadge").textContent = "Loading…";
             const list = $("collabList");
             list.innerHTML = `<div class="rounded-xl border border-slate-800 bg-slate-950/30 p-3 text-xs text-slate-400">Loading…</div>`;
             try {
-                const data = await apiFetch(`/problems/${problemId}/users`);
-                const items = data.items || [];
+                const d = await api(`/problems/${problemId}/users`);
+                const items = d.items || [];
                 $("collabBadge").textContent = `${items.length} users`;
                 list.innerHTML = items.length ? "" : `<div class="rounded-xl border border-slate-800 bg-slate-950/30 p-3 text-xs text-slate-400">No users.</div>`;
                 for (const r of items) {
                     const el = document.createElement("div");
                     el.className = "rounded-xl border border-slate-800 bg-slate-950/30 p-3";
-                    el.innerHTML = `
-          <div class="flex items-start justify-between gap-2">
-            <div class="min-w-0">
-              <div class="text-sm font-semibold truncate">${escapeHtml(r.user?.display_name || "Unnamed")}</div>
-              <div class="text-[11px] text-slate-500 font-mono break-all mt-1">${escapeHtml(r.user?.id || "")}</div>
-              <div class="text-[11px] text-slate-400 mt-1">matched_at: <span class="font-mono">${escapeHtml(r.matched_at || "")}</span></div>
-            </div>
-            <span class="text-xs px-2 py-1 rounded-full border border-slate-800 bg-slate-800/50">${escapeHtml(r.role || "")}</span>
-          </div>`;
+                    el.innerHTML = `<div class="flex items-start justify-between gap-2">
+          <div class="min-w-0">
+            <div class="text-sm font-semibold truncate">${esc(r.user?.display_name || "Unnamed")}</div>
+            <div class="text-[11px] text-slate-500 font-mono break-all mt-1">${esc(r.user?.id || "")}</div>
+          </div>
+          <span class="text-xs px-2 py-1 rounded-full border border-slate-800 bg-slate-800/50">${esc(r.role || "")}</span>
+        </div>`;
                     list.appendChild(el);
                 }
             } catch (e) {
                 $("collabBadge").textContent = "Error";
-                list.innerHTML = `<div class="rounded-xl border border-rose-800/60 bg-rose-900/20 p-3 text-xs">${escapeHtml(e.message)}</div>`;
+                list.innerHTML = `<div class="rounded-xl border border-rose-800/60 bg-rose-900/20 p-3 text-xs">${esc(e.message)}</div>`;
             }
         }
-
-        // -------- Events
-        $("baseUrl").addEventListener("change", () => { state.baseUrl = $("baseUrl").value.trim(); toast("ok", "Base URL updated", state.baseUrl); });
 
         $("btnPing").onclick = ping;
         $("btnUsers").onclick = loadUsers;
@@ -472,14 +395,12 @@
         $("btnLogout").onclick = logout;
         $("btnMe").onclick = me;
         $("btnSearch").onclick = loadProblems;
-        $("btnClear").onclick = () => { ["fSearch", "fCategory", "fLocation", "fCountry"].forEach(id => $(id).value = ""); loadProblems(); toast("ok", "Cleared", ""); };
+        $("btnClear").onclick = () => { ["fSearch", "fCategory", "fLocation", "fCountry"].forEach(id => $(id).value = ""); loadProblems(); };
         $("btnMyMatches").onclick = loadMyMatches;
-
         ["fSearch", "fCategory", "fLocation", "fCountry"].forEach(id => $(id).addEventListener("keydown", e => e.key === "Enter" && loadProblems()));
 
-        // -------- Init
         (async function init() {
-            setBadges();
+            badges();
             await ping();
             await loadUsers();
             await loadProblems();
