@@ -271,6 +271,10 @@ app.use(express.static(path.join(process.cwd(), 'public')))
 app.get('/', (_req, res) => {
 	res.sendFile(path.join(process.cwd(), 'public', 'index.html'))
 })
+// Serve the API UI Test
+app.get('/api-test', (_req, res) => {
+	res.sendFile(path.join(process.cwd(), 'public', 'index_api.html'))
+})
 
 // Fallback error handler
 app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {

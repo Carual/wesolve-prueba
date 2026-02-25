@@ -1,413 +1,851 @@
 <!doctype html>
-<html lang="en">
-
+<html lang="es">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>WeSolve Tester</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        /* Better scrollbars (Chrome/Edge/Safari + Firefox) */
-        .scroll {
-            overflow: auto;
-            scrollbar-width: thin;
-            scrollbar-color: rgba(148, 163, 184, .60) rgba(2, 6, 23, .35);
-        }
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>WeSolve</title>
 
-        .scroll::-webkit-scrollbar {
-            width: 10px;
-            height: 10px;
-        }
+  <!-- Material Symbols (icons) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400,0,0&display=swap" rel="stylesheet">
 
-        .scroll::-webkit-scrollbar-track {
-            background: rgba(2, 6, 23, .35);
-            border-radius: 999px;
-        }
+  <!-- Material Web (Material Design 3 components) -->
+  <script type="module">
+    import 'https://unpkg.com/@material/web@2.2.0/all.js?module';
+  </script>
 
-        .scroll::-webkit-scrollbar-thumb {
-            background: linear-gradient(180deg, rgba(148, 163, 184, .55), rgba(148, 163, 184, .35));
-            border: 2px solid rgba(2, 6, 23, .35);
-            border-radius: 999px;
-        }
+  <style>
+    :root{
+      color-scheme: light;
+      --md-sys-color-primary: #1a73e8;
+      --md-sys-color-on-primary: #ffffff;
+      --md-sys-color-surface: #ffffff;
+      --md-sys-color-surface-container: #f6f7fb;
+      --md-sys-color-surface-container-high: #eef1f7;
+      --md-sys-color-outline: #d0d7e2;
+      --md-sys-color-on-surface: #111827;
+      --md-sys-color-on-surface-variant: #4b5563;
+      --md-sys-color-secondary: #5f6368;
+      --md-sys-color-tertiary: #0f9d58;
+      --shadow: 0 10px 28px rgba(17,24,39,.08);
+      --radius: 18px;
+      --radius2: 14px;
 
-        .scroll::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(180deg, rgba(148, 163, 184, .75), rgba(148, 163, 184, .55));
-        }
-    </style>
+      --font: Roboto, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif;
+    }
+
+    body{
+      margin:0;
+      font-family: var(--font);
+      background: radial-gradient(900px 520px at 20% -10%, rgba(26,115,232,.12), transparent 65%),
+                  radial-gradient(760px 520px at 85% 10%, rgba(15,157,88,.10), transparent 70%),
+                  #fbfcff;
+      color: var(--md-sys-color-on-surface);
+    }
+
+    .appbar{
+      position: sticky;
+      top:0;
+      z-index: 20;
+      backdrop-filter: blur(10px);
+      background: rgba(255,255,255,.78);
+      border-bottom: 1px solid rgba(208,215,226,.7);
+    }
+    .appbar-inner{
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 12px 16px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width: 180px;
+    }
+    .logo{
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, rgba(26,115,232,1), rgba(15,157,88,1));
+      box-shadow: 0 10px 22px rgba(26,115,232,.18);
+    }
+    .brand h1{
+      font-size: 16px;
+      margin:0;
+      letter-spacing: .2px;
+      font-weight: 700;
+    }
+    .brand .sub{
+      font-size: 12px;
+      color: var(--md-sys-color-on-surface-variant);
+      margin-top: 2px;
+    }
+
+    .content{
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 18px 16px 40px;
+      display:grid;
+      grid-template-columns: 1fr 340px;
+      gap: 16px;
+    }
+    @media (max-width: 980px){
+      .content{ grid-template-columns: 1fr; }
+    }
+
+    .panel{
+      background: var(--md-sys-color-surface);
+      border: 1px solid rgba(208,215,226,.8);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+
+    .panel-hd{
+      padding: 14px 14px 12px;
+      border-bottom: 1px solid rgba(208,215,226,.65);
+      background: linear-gradient(180deg, rgba(246,247,251,.65), rgba(255,255,255,.5));
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+    .panel-hd h2{
+      font-size: 13px;
+      margin:0;
+      font-weight: 700;
+      letter-spacing:.2px;
+    }
+    .panel-hd .meta{
+      font-size: 12px;
+      color: var(--md-sys-color-on-surface-variant);
+      display:flex;
+      align-items:center;
+      gap:8px;
+      white-space: nowrap;
+    }
+
+    .panel-bd{ padding: 14px; }
+
+    .searchbar{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:stretch;
+    }
+    .searchbar md-outlined-text-field{
+      flex: 1 1 280px;
+      min-width: 220px;
+    }
+    .searchbar .mini{
+      flex: 0 0 170px;
+      min-width: 150px;
+    }
+    .searchbar .mini2{
+      flex: 0 0 160px;
+      min-width: 150px;
+    }
+
+    .actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top: 10px;
+      align-items:center;
+    }
+
+    .scroll{
+      max-height: 690px;
+      overflow:auto;
+      padding-right: 6px;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(17,24,39,.25) transparent;
+    }
+    .scroll::-webkit-scrollbar{ width:10px; height:10px; }
+    .scroll::-webkit-scrollbar-track{ background: transparent; }
+    .scroll::-webkit-scrollbar-thumb{
+      background: rgba(17,24,39,.18);
+      border: 2px solid transparent;
+      background-clip: padding-box;
+      border-radius: 999px;
+    }
+    .scroll::-webkit-scrollbar-thumb:hover{ background: rgba(17,24,39,.28); }
+
+    .cards{
+      display:flex;
+      flex-direction:column;
+      gap: 10px;
+    }
+
+    .card{
+      border: 1px solid rgba(208,215,226,.75);
+      border-radius: var(--radius2);
+      background: #fff;
+      padding: 12px;
+      display:flex;
+      gap: 12px;
+      align-items:flex-start;
+    }
+    .ic{
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex: 0 0 auto;
+      background: rgba(26,115,232,.08);
+      border: 1px solid rgba(26,115,232,.18);
+    }
+    .ic .material-symbols-rounded{
+      font-size: 22px;
+      color: var(--md-sys-color-primary);
+    }
+
+    .card-main{ flex: 1 1 auto; min-width: 0; }
+    .title{
+      font-weight: 700;
+      font-size: 14px;
+      margin: 0;
+      line-height: 1.25;
+    }
+    .desc{
+      margin-top: 6px;
+      font-size: 13px;
+      color: rgba(17,24,39,.78);
+      line-height: 1.35;
+    }
+    .chips{
+      margin-top: 8px;
+      display:flex;
+      flex-wrap:wrap;
+      gap: 8px;
+      align-items:center;
+      color: var(--md-sys-color-on-surface-variant);
+      font-size: 12px;
+    }
+    .chip{
+      display:inline-flex;
+      gap:6px;
+      align-items:center;
+      border: 1px solid rgba(208,215,226,.8);
+      border-radius: 999px;
+      padding: 4px 10px;
+      background: rgba(246,247,251,.9);
+      white-space: nowrap;
+    }
+    .chip .material-symbols-rounded{ font-size: 16px; color: rgba(17,24,39,.55); }
+
+    .card-actions{
+      display:flex;
+      flex-direction:column;
+      gap: 8px;
+      align-items:stretch;
+      flex: 0 0 auto;
+      min-width: 168px;
+    }
+    @media (max-width: 680px){
+      .card{ flex-direction:column; }
+      .card-actions{ flex-direction:row; min-width: 0; flex-wrap:wrap; }
+    }
+
+    .hint{
+      font-size: 12px;
+      color: var(--md-sys-color-on-surface-variant);
+      line-height: 1.35;
+    }
+
+    .right-col .scroll{ max-height: 420px; }
+    .right-col .panel{ position: sticky; top: 74px; }
+
+    .login-chip{
+      display:flex;
+      align-items:center;
+      gap: 8px;
+      color: var(--md-sys-color-on-surface-variant);
+      font-size: 12px;
+    }
+    .avatar{
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      background: rgba(26,115,232,.12);
+      border: 1px solid rgba(26,115,232,.22);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight: 700;
+      color: var(--md-sys-color-primary);
+    }
+
+    md-dialog::part(container){
+      border-radius: 20px;
+    }
+    .dialog-body{
+      display:flex;
+      flex-direction:column;
+      gap: 12px;
+      padding-top: 6px;
+    }
+    .mono{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+    }
+
+    md-outlined-text-field{ --md-outlined-text-field-container-shape: 14px; }
+    md-filled-tonal-button{ --md-filled-tonal-button-container-shape: 999px; }
+    md-outlined-button{ --md-outlined-button-container-shape: 999px; }
+    md-text-button{ --md-text-button-container-shape: 999px; }
+
+    .toast{
+      position: fixed;
+      right: 16px;
+      bottom: 16px;
+      max-width: min(420px, calc(100vw - 32px));
+      z-index: 50;
+      display:flex;
+      flex-direction:column;
+      gap: 10px;
+    }
+    .toast-item{
+      border-radius: 16px;
+      border: 1px solid rgba(208,215,226,.9);
+      background: rgba(255,255,255,.92);
+      box-shadow: var(--shadow);
+      padding: 10px 12px;
+      display:flex;
+      gap: 10px;
+      align-items:flex-start;
+    }
+    .toast-dot{
+      width: 10px; height: 10px; border-radius: 999px;
+      background: rgba(26,115,232, .9);
+      margin-top: 6px;
+      flex: 0 0 auto;
+    }
+    .toast-dot.bad{ background: rgba(220,38,38,.9); }
+    .toast-dot.ok{ background: rgba(15,157,88,.9); }
+    .toast-t{ font-weight: 700; font-size: 13px; margin:0; }
+    .toast-m{ margin-top: 2px; font-size: 12px; color: var(--md-sys-color-on-surface-variant); line-height: 1.35; }
+    .toast-x{
+      margin-left:auto;
+      border:none;
+      background:transparent;
+      cursor:pointer;
+      color: rgba(17,24,39,.6);
+      font-size: 18px;
+      line-height: 1;
+      padding: 0 4px;
+    }
+  
+    .match-actions-row{
+      display:flex;
+      gap:10px;
+      margin-top:10px;
+      align-items:center;
+      justify-content:flex-end;
+    }
+    .match-actions-row md-outlined-button{
+      flex: 1 1 0;
+    }
+    /* Soft red unmatch button (Material-ish) */
+    md-outlined-button.unmatch-soft{
+      --md-outlined-button-label-text-color: #b3261e;
+      --md-outlined-button-outline-color: rgba(179,38,30,.35);
+      --md-outlined-button-hover-state-layer-color: rgba(179,38,30,.08);
+      --md-outlined-button-pressed-state-layer-color: rgba(179,38,30,.14);
+    }
+
+  </style>
 </head>
 
-<body class="bg-slate-950 text-slate-100">
-    <div class="max-w-6xl mx-auto p-4">
-        <div class="flex flex-wrap items-center gap-2 mb-3">
-            <h1 class="text-lg font-bold">WeSolve – Tester</h1>
-            <span id="apiBadge" class="text-xs px-2 py-1 rounded-full bg-slate-900 border border-slate-800">API:
-                ?</span>
-            <span id="sessionBadge" class="text-xs px-2 py-1 rounded-full bg-slate-900 border border-slate-800">Not
-                logged</span>
+<body>
+  <header class="appbar">
+    <div class="appbar-inner">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div>
+          <h1>WeSolve</h1>
+          <div class="sub">Buscador de problemas · Material Design 3</div>
         </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-4">
-            <!-- LEFT -->
-            <div class="rounded-2xl border border-slate-800 bg-slate-900/40">
-                <div class="p-4 border-b border-slate-800">
-                    <div class="text-sm font-semibold">Session</div>
-                    <div class="text-xs text-slate-400 mt-1">Same-origin API (no localhost), JWT in localStorage</div>
-                </div>
-
-                <div class="p-4 space-y-3">
-                    <div class="grid grid-cols-3 gap-2">
-                        <button id="btnPing"
-                            class="rounded-xl border border-slate-800 bg-slate-800/50 px-3 py-2 text-sm font-semibold">Ping</button>
-                        <button id="btnMe"
-                            class="rounded-xl border border-slate-800 bg-slate-800/50 px-3 py-2 text-sm font-semibold">/me</button>
-                        <button id="btnLogout"
-                            class="rounded-xl border border-rose-800/60 bg-rose-900/20 px-3 py-2 text-sm font-semibold">Logout</button>
-                    </div>
-
-                    <div class="rounded-xl border border-slate-800 bg-slate-950/30 p-3">
-                        <label class="text-xs text-slate-400">Login (POST /login)</label>
-                        <input id="loginUserId"
-                            class="mt-1 w-full rounded-xl bg-slate-950/50 border border-slate-800 px-3 py-2 text-sm"
-                            placeholder="user UUID (pick from Users)" />
-                        <button id="btnLogin"
-                            class="mt-2 w-full rounded-xl border border-emerald-800/60 bg-emerald-900/20 px-3 py-2 text-sm font-semibold">
-                            Login
-                        </button>
-                        <div class="text-xs text-slate-400 mt-2">Token:</div>
-                        <div id="tokenPreview" class="text-xs break-all text-slate-300 mt-1 font-mono">—</div>
-                    </div>
-
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <div class="text-sm font-semibold">Users</div>
-                            <div class="text-xs text-slate-400">GET /users</div>
-                        </div>
-                        <button id="btnUsers"
-                            class="rounded-xl border border-slate-800 bg-slate-800/50 px-3 py-2 text-sm font-semibold">Refresh</button>
-                    </div>
-                    <div id="usersList" class="scroll max-h-[340px] pr-1 space-y-2"></div>
-
-                    <div class="flex items-center justify-between pt-2">
-                        <div>
-                            <div class="text-sm font-semibold">My Matches</div>
-                            <div class="text-xs text-slate-400">GET /me/matches</div>
-                        </div>
-                        <button id="btnMyMatches"
-                            class="rounded-xl border border-slate-800 bg-slate-800/50 px-3 py-2 text-sm font-semibold">Refresh</button>
-                    </div>
-                    <div id="myMatchesList" class="scroll max-h-[420px] pr-1 space-y-2"></div>
-                </div>
-            </div>
-
-            <!-- RIGHT -->
-            <div class="rounded-2xl border border-slate-800 bg-slate-900/40">
-                <div class="p-4 border-b border-slate-800">
-                    <div class="text-sm font-semibold">Problems</div>
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-2 mt-3">
-                        <input id="fSearch" class="rounded-xl bg-slate-950/50 border border-slate-800 px-3 py-2 text-sm"
-                            placeholder="search" />
-                        <input id="fCategory"
-                            class="rounded-xl bg-slate-950/50 border border-slate-800 px-3 py-2 text-sm"
-                            placeholder="category" />
-                        <input id="fLocation"
-                            class="rounded-xl bg-slate-950/50 border border-slate-800 px-3 py-2 text-sm"
-                            placeholder="location" />
-                        <input id="fCountry"
-                            class="rounded-xl bg-slate-950/50 border border-slate-800 px-3 py-2 text-sm"
-                            placeholder="country (US)" />
-                    </div>
-                    <div class="flex gap-2 mt-3">
-                        <button id="btnSearch"
-                            class="rounded-xl border border-slate-800 bg-slate-800/50 px-3 py-2 text-sm font-semibold">Search</button>
-                        <button id="btnClear"
-                            class="rounded-xl border border-slate-800 bg-slate-800/50 px-3 py-2 text-sm font-semibold">Clear</button>
-                        <div id="resultsMeta" class="ml-auto text-xs text-slate-400 self-center">—</div>
-                    </div>
-                </div>
-
-                <div class="p-4 grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-4">
-                    <div>
-                        <div class="text-sm font-semibold mb-2">Results</div>
-                        <div id="problemsList" class="scroll max-h-[720px] pr-1 space-y-2"></div>
-                    </div>
-
-                    <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <div>
-                                <div class="text-sm font-semibold">Collaborators</div>
-                                <div class="text-xs text-slate-400">GET /problems/:id/users</div>
-                            </div>
-                            <span id="collabBadge"
-                                class="text-xs px-2 py-1 rounded-full bg-slate-900 border border-slate-800">Select</span>
-                        </div>
-                        <div id="collabList" class="scroll max-h-[420px] pr-1 space-y-2">
-                            <div class="rounded-xl border border-slate-800 bg-slate-950/30 p-3 text-xs text-slate-400">
-                                No problem selected.</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="toasts" class="fixed bottom-4 right-4 space-y-2 z-50"></div>
-
-    <script>
-        const $ = (id) => document.getElementById(id);
-        const LS_TOKEN = "wesolve_token", LS_UID = "wesolve_uid";
-
-        const state = {
-            baseUrl: window.location.origin, // ✅ no localhost
-            token: localStorage.getItem(LS_TOKEN) || "",
-            userId: localStorage.getItem(LS_UID) || "",
-            problems: [],
-            myMatches: new Map(), // problemId -> { role, matched_at, problem }
-        };
-
-        const esc = (s) => String(s).replace(/[&<>"']/g, c => ({
-            "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
-        })[c]);
-
-        function toast(kind, title, msg) {
-            const wrap = $("toasts");
-            const cls = kind === "ok" ? "border-emerald-800/60 bg-emerald-900/20"
-                : kind === "bad" ? "border-rose-800/60 bg-rose-900/20"
-                    : "border-slate-700 bg-slate-800/60";
-            const el = document.createElement("div");
-            el.className = `w-[360px] max-w-[calc(100vw-2rem)] rounded-xl border ${cls} p-3 shadow-lg`;
-            el.innerHTML = `<div class="flex items-start gap-2">
-      <div class="flex-1">
-        <div class="text-sm font-semibold">${esc(title)}</div>
-        ${msg ? `<div class="text-xs text-slate-200/80 mt-1 break-words">${esc(msg)}</div>` : ""}
       </div>
-      <button class="text-slate-300 hover:text-white text-lg leading-none px-2">×</button>
-    </div>`;
-            el.querySelector("button").onclick = () => el.remove();
-            wrap.appendChild(el); setTimeout(() => el.isConnected && el.remove(), 3800);
-        }
 
-        const url = (p) => state.baseUrl.replace(/\/+$/, "") + p;
+      <div style="display:flex; align-items:center; gap: 10px;">
+        <div id="sessionInfo" class="login-chip" style="display:none;">
+          <div class="avatar" id="avatar">U</div>
+          <span id="sessionText" class="mono">—</span>
+        </div>
+        <md-outlined-button id="btnLoginOpen">
+          <span class="material-symbols-rounded" slot="icon">login</span>
+          Login
+        </md-outlined-button>
+        <md-text-button id="btnLogout" style="display:none;">
+          <span class="material-symbols-rounded" slot="icon">logout</span>
+          Salir
+        </md-text-button>
+      </div>
+    </div>
+  </header>
 
-        async function api(p, { method = "GET", body = null } = {}, authed = false) {
-            const headers = { "Content-Type": "application/json" };
-            if (authed) { if (!state.token) throw new Error("No token. Login first."); headers.Authorization = "Bearer " + state.token; }
-            const res = await fetch(url(p), { method, headers, body: body ? JSON.stringify(body) : null });
-            const text = await res.text(); let json = null; try { json = text ? JSON.parse(text) : null } catch { }
-            if (!res.ok) throw new Error((json && json.error) ? json.error : (text || res.statusText));
-            return json;
-        }
+  <main class="content">
+    <section class="panel">
+      <div class="panel-hd">
+        <h2>Búsqueda</h2>
+        <div class="meta">
+          <span class="material-symbols-rounded" style="font-size:18px;">travel_explore</span>
+          <span id="resultsMeta">—</span>
+        </div>
+      </div>
 
-        function badges() {
-            $("sessionBadge").textContent = state.token ? `Logged: ${state.userId?.slice(0, 8)}…` : "Not logged";
-            $("tokenPreview").textContent = state.token || "—";
-        }
+      <div class="panel-bd">
+        <div class="searchbar">
+          <md-outlined-text-field id="qSearch" label="Buscar" placeholder="Ej: salud, agua, transporte">
+            <span class="material-symbols-rounded" slot="leading-icon">search</span>
+          </md-outlined-text-field>
 
-        function qProblems() {
-            const p = new URLSearchParams();
-            const s = $("fSearch").value.trim(), c = $("fCategory").value.trim(), l = $("fLocation").value.trim(), cc = $("fCountry").value.trim().toUpperCase();
-            if (s) p.set("search", s); if (c) p.set("category", c); if (l) p.set("location", l); if (cc) p.set("country_code", cc);
-            const qs = p.toString(); return qs ? `?${qs}` : "";
-        }
+          <md-outlined-text-field id="qCategory" class="mini" label="Categoría" placeholder="Ej: Health"></md-outlined-text-field>
+          <md-outlined-text-field id="qLocation" class="mini" label="Ubicación" placeholder="Ej: Seattle"></md-outlined-text-field>
+          <md-outlined-text-field id="qCountry" class="mini2" label="País (ISO)" placeholder="US" maxlength="2"></md-outlined-text-field>
+        </div>
 
-        async function ping() {
-            try { await api("/health"); $("apiBadge").textContent = "API: OK"; }
-            catch { $("apiBadge").textContent = "API: FAIL"; }
-        }
+        <div class="actions">
+          <md-filled-tonal-button id="btnSearch">
+            <span class="material-symbols-rounded" slot="icon">search</span>
+            Buscar
+          </md-filled-tonal-button>
 
-        async function loadUsers() {
-            const list = $("usersList");
-            list.innerHTML = `<div class="rounded-xl border border-slate-800 bg-slate-950/30 p-3 text-xs text-slate-400">Loading…</div>`;
-            try {
-                const d = await api("/users"); const items = d.items || [];
-                list.innerHTML = items.length ? "" : `<div class="rounded-xl border border-slate-800 bg-slate-950/30 p-3 text-xs text-slate-400">No users.</div>`;
-                for (const u of items) {
-                    const el = document.createElement("div");
-                    el.className = "rounded-xl border border-slate-800 bg-slate-950/30 p-3";
-                    el.innerHTML = `<div class="flex items-start justify-between gap-2">
-          <div class="min-w-0">
-            <div class="text-sm font-semibold truncate">${esc(u.display_name || "Unnamed")}</div>
-            <div class="text-xs text-slate-400 font-mono break-all mt-1">${esc(u.id)}</div>
-          </div>
-          <button class="shrink-0 rounded-xl border border-slate-800 bg-slate-800/50 px-3 py-2 text-xs font-semibold">Use</button>
-        </div>`;
-                    el.querySelector("button").onclick = () => { $("loginUserId").value = u.id; toast("ok", "User selected", ""); };
-                    list.appendChild(el);
-                }
-            } catch (e) { list.innerHTML = `<div class="rounded-xl border border-rose-800/60 bg-rose-900/20 p-3 text-xs">${esc(e.message)}</div>`; }
-        }
+          <md-outlined-button id="btnClear">
+            <span class="material-symbols-rounded" slot="icon">backspace</span>
+            Limpiar
+          </md-outlined-button>
 
-        async function login() {
-            const userId = $("loginUserId").value.trim();
-            if (!userId) return toast("bad", "Missing userId", "Pick one from Users list.");
-            try {
-                const d = await api("/login", { method: "POST", body: { userId } });
-                state.token = d.token || ""; state.userId = d.user?.id || userId;
-                localStorage.setItem(LS_TOKEN, state.token); localStorage.setItem(LS_UID, state.userId);
-                badges(); toast("ok", "Logged in", d.user?.display_name || state.userId);
-                await loadMyMatches();
-            } catch (e) { toast("bad", "Login failed", e.message); }
-        }
+          <span class="hint">Tip: en producción la UI usa el mismo dominio del backend (same-origin).</span>
+        </div>
 
-        function logout() {
-            state.token = ""; state.userId = "";
-            localStorage.removeItem(LS_TOKEN); localStorage.removeItem(LS_UID);
-            state.myMatches.clear(); badges(); renderMyMatches();
-            toast("ok", "Logged out", "");
-        }
+        <div style="height:12px;"></div>
 
-        async function me() {
-            try { const d = await api("/me", {}, true); toast("ok", "/me", d.user?.display_name || "ok"); }
-            catch (e) { toast("bad", "/me failed", e.message); }
-        }
+        <div class="scroll">
+          <div class="cards" id="problemsList"></div>
+        </div>
+      </div>
+    </section>
 
-        async function loadMyMatches() {
-            const box = $("myMatchesList");
-            if (!state.token) return renderMyMatches();
-            box.innerHTML = `<div class="rounded-xl border border-slate-800 bg-slate-950/30 p-3 text-xs text-slate-400">Loading…</div>`;
-            try {
-                const d = await api("/me/matches?limit=300", {}, true);
-                state.myMatches.clear();
-                for (const r of (d.items || [])) state.myMatches.set(r.problem.id, { role: r.role, matched_at: r.matched_at, problem: r.problem });
-                renderMyMatches(); renderProblems();
-            } catch (e) { box.innerHTML = `<div class="rounded-xl border border-rose-800/60 bg-rose-900/20 p-3 text-xs">${esc(e.message)}</div>`; }
-        }
-
-        function renderMyMatches() {
-            const box = $("myMatchesList"); box.innerHTML = "";
-            if (!state.token) return box.innerHTML = `<div class="rounded-xl border border-slate-800 bg-slate-950/30 p-3 text-xs text-slate-400">Login to see matches.</div>`;
-            const items = [...state.myMatches.values()];
-            if (!items.length) return box.innerHTML = `<div class="rounded-xl border border-slate-800 bg-slate-950/30 p-3 text-xs text-slate-400">No matches.</div>`;
-            for (const m of items) {
-                const p = m.problem;
-                const el = document.createElement("div");
-                el.className = "rounded-xl border border-slate-800 bg-slate-950/30 p-3";
-                el.innerHTML = `<div class="flex items-start justify-between gap-2">
-        <div class="min-w-0">
-          <div class="text-sm font-semibold">${esc(p.title)}</div>
-          <div class="text-xs text-slate-400 mt-1 flex flex-wrap gap-2">
-            <span class="px-2 py-1 rounded-full border border-slate-800 bg-slate-800/50">${esc(m.role)}</span>
-            <span class="px-2 py-1 rounded-full border border-slate-800 bg-slate-800/50">📍 ${esc(p.location)}</span>
+    <aside class="right-col">
+      <section class="panel">
+        <div class="panel-hd">
+          <h2>Mi actividad</h2>
+          <div class="meta">
+            <span class="material-symbols-rounded" style="font-size:18px;">account_circle</span>
+            <span id="meMeta">No autenticado</span>
           </div>
         </div>
-        <div class="shrink-0 flex flex-col gap-2">
-          <button data-u class="rounded-xl border border-slate-800 bg-slate-800/50 px-3 py-2 text-xs font-semibold">Users</button>
-          <button data-x class="rounded-xl border border-rose-800/60 bg-rose-900/20 px-3 py-2 text-xs font-semibold">Unmatch</button>
-        </div>
-      </div>`;
-                el.querySelector("[data-u]").onclick = () => loadCollaborators(p.id);
-                el.querySelector("[data-x]").onclick = () => unmatch(p);
-                box.appendChild(el);
-            }
-        }
 
-        async function loadProblems() {
-            const list = $("problemsList");
-            list.innerHTML = `<div class="rounded-xl border border-slate-800 bg-slate-950/30 p-3 text-xs text-slate-400">Loading…</div>`;
-            try {
-                const d = await api("/problems" + qProblems());
-                state.problems = d.items || [];
-                $("resultsMeta").textContent = `${state.problems.length} problems`;
-                renderProblems();
-            } catch (e) {
-                list.innerHTML = `<div class="rounded-xl border border-rose-800/60 bg-rose-900/20 p-3 text-xs">${esc(e.message)}</div>`;
-                $("resultsMeta").textContent = "Error";
-            }
-        }
-
-        function renderProblems() {
-            const list = $("problemsList"); list.innerHTML = "";
-            if (!state.problems.length) return list.innerHTML = `<div class="rounded-xl border border-slate-800 bg-slate-950/30 p-3 text-xs text-slate-400">No results.</div>`;
-            for (const p of state.problems) {
-                const my = state.myMatches.get(p.id);
-                const el = document.createElement("div");
-                el.className = "rounded-xl border border-slate-800 bg-slate-950/30 p-3";
-                el.innerHTML = `<div class="flex items-start justify-between gap-2">
-        <div class="min-w-0">
-          <div class="text-sm font-semibold">${esc(p.title)}</div>
-          <div class="text-xs text-slate-400 mt-1 flex flex-wrap gap-2">
-            <span class="px-2 py-1 rounded-full border border-slate-800 bg-slate-800/50">🏷 ${esc(p.category)}</span>
-            <span class="px-2 py-1 rounded-full border border-slate-800 bg-slate-800/50">📍 ${esc(p.location)}</span>
-            ${my ? `<span class="px-2 py-1 rounded-full border border-emerald-800/60 bg-emerald-900/20">🙋 ${esc(my.role)}</span>` : ""}
+        <div class="panel-bd">
+          <div class="actions" style="margin-top:0;">
+            <md-outlined-button id="btnRefreshMatches" style="width:100%;">
+              <span class="material-symbols-rounded" slot="icon">refresh</span>
+              Actualizar mis matches
+            </md-outlined-button>
           </div>
-          <div class="text-xs text-slate-300 mt-2">${esc((p.description || "").slice(0, 120))}${(p.description || "").length > 120 ? "…" : ""}</div>
-        </div>
-        <div class="shrink-0 flex flex-col gap-2">
-          <button data-u class="rounded-xl border border-slate-800 bg-slate-800/50 px-3 py-2 text-xs font-semibold">Users</button>
-          <button data-s class="rounded-xl border border-emerald-800/60 bg-emerald-900/20 px-3 py-2 text-xs font-semibold">Match SOLVER</button>
-          <button data-a class="rounded-xl border border-emerald-800/60 bg-emerald-900/20 px-3 py-2 text-xs font-semibold">Match AFFECTED</button>
-          <button data-x class="rounded-xl border border-rose-800/60 bg-rose-900/20 px-3 py-2 text-xs font-semibold">Unmatch</button>
-        </div>
-      </div>`;
-                el.querySelector("[data-u]").onclick = () => loadCollaborators(p.id);
-                el.querySelector("[data-s]").onclick = () => match(p, "SOLVER");
-                el.querySelector("[data-a]").onclick = () => match(p, "AFFECTED");
-                el.querySelector("[data-x]").onclick = () => unmatch(p);
-                list.appendChild(el);
-            }
-        }
 
-        async function match(p, role) {
-            try {
-                await api(`/problems/${p.id}/match`, { method: "POST", body: { role } }, true);
-                toast("ok", "Matched ✅", `${p.title} — ${role}`);
-                await loadMyMatches(); await loadProblems();
-            } catch (e) { toast("bad", "Match failed", e.message); }
-        }
+          <div style="height:10px;"></div>
 
-        async function unmatch(p) {
-            try {
-                await api(`/problems/${p.id}/match`, { method: "DELETE" }, true);
-                toast("ok", "Unmatched", p.title);
-                await loadMyMatches(); await loadProblems();
-            } catch (e) { toast("bad", "Unmatch failed", e.message); }
-        }
+          <div class="hint">Tus matches se obtienen desde <span class="mono">GET /me/matches</span>.</div>
+          <div style="height:10px;"></div>
 
-        async function loadCollaborators(problemId) {
-            $("collabBadge").textContent = "Loading…";
-            const list = $("collabList");
-            list.innerHTML = `<div class="rounded-xl border border-slate-800 bg-slate-950/30 p-3 text-xs text-slate-400">Loading…</div>`;
-            try {
-                const d = await api(`/problems/${problemId}/users`);
-                const items = d.items || [];
-                $("collabBadge").textContent = `${items.length} users`;
-                list.innerHTML = items.length ? "" : `<div class="rounded-xl border border-slate-800 bg-slate-950/30 p-3 text-xs text-slate-400">No users.</div>`;
-                for (const r of items) {
-                    const el = document.createElement("div");
-                    el.className = "rounded-xl border border-slate-800 bg-slate-950/30 p-3";
-                    el.innerHTML = `<div class="flex items-start justify-between gap-2">
-          <div class="min-w-0">
-            <div class="text-sm font-semibold truncate">${esc(r.user?.display_name || "Unnamed")}</div>
-            <div class="text-[11px] text-slate-500 font-mono break-all mt-1">${esc(r.user?.id || "")}</div>
+          <div class="scroll">
+            <div class="cards" id="myMatchesList"></div>
           </div>
-          <span class="text-xs px-2 py-1 rounded-full border border-slate-800 bg-slate-800/50">${esc(r.role || "")}</span>
-        </div>`;
-                    list.appendChild(el);
-                }
-            } catch (e) {
-                $("collabBadge").textContent = "Error";
-                list.innerHTML = `<div class="rounded-xl border border-rose-800/60 bg-rose-900/20 p-3 text-xs">${esc(e.message)}</div>`;
-            }
-        }
 
-        $("btnPing").onclick = ping;
-        $("btnUsers").onclick = loadUsers;
-        $("btnLogin").onclick = login;
-        $("btnLogout").onclick = logout;
-        $("btnMe").onclick = me;
-        $("btnSearch").onclick = loadProblems;
-        $("btnClear").onclick = () => { ["fSearch", "fCategory", "fLocation", "fCountry"].forEach(id => $(id).value = ""); loadProblems(); };
-        $("btnMyMatches").onclick = loadMyMatches;
-        ["fSearch", "fCategory", "fLocation", "fCountry"].forEach(id => $(id).addEventListener("keydown", e => e.key === "Enter" && loadProblems()));
+          <div style="height:14px;"></div>
 
-        (async function init() {
-            badges();
-            await ping();
-            await loadUsers();
-            await loadProblems();
-            if (state.token && state.userId) await loadMyMatches();
-            else renderMyMatches();
-        })();
-    </script>
+          <div class="panel-hd" style="margin: 0 -14px; border-left:none; border-right:none; border-top:1px solid rgba(208,215,226,.65); border-bottom:1px solid rgba(208,215,226,.65); border-radius:0;">
+            <h2>Colaboradores</h2>
+            <div class="meta">
+              <span class="material-symbols-rounded" style="font-size:18px;">group</span>
+              <span id="collabMeta">Selecciona un problema</span>
+            </div>
+          </div>
+
+          <div style="height:10px;"></div>
+
+          <div class="scroll">
+            <div class="cards" id="collabList"></div>
+          </div>
+        </div>
+      </section>
+    </aside>
+  </main>
+
+  <md-dialog id="loginDialog">
+    <div slot="headline">Login</div>
+    <div slot="content" class="dialog-body">
+      <div class="hint">Ingresa tu UUID de usuario para obtener un token JWT.</div>
+      <md-outlined-text-field id="loginUuid" label="User UUID" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" class="mono"></md-outlined-text-field>
+      <div class="hint">Luego podrás hacer match/unmatch. El token se guarda en <span class="mono">localStorage</span>.</div>
+    </div>
+    <div slot="actions">
+      <md-text-button id="btnLoginCancel">Cancelar</md-text-button>
+      <md-filled-tonal-button id="btnLoginSubmit">Ingresar</md-filled-tonal-button>
+    </div>
+  </md-dialog>
+
+  <div class="toast" id="toasts"></div>
+
+<script>
+  const BASE = window.location.origin.replace(/\/+$/,"");
+  const LS_TOKEN = "wesolve_token";
+  const LS_UID = "wesolve_uid";
+  const $ = (id) => document.getElementById(id);
+
+  const state = {
+    token: localStorage.getItem(LS_TOKEN) || "",
+    userId: localStorage.getItem(LS_UID) || "",
+    problems: [],
+    matches: new Map(),
+  };
+
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, c => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+  })[c]);
+
+  function toast(kind, title, msg){
+    const wrap = $("toasts");
+    const el = document.createElement("div");
+    el.className = "toast-item";
+    el.innerHTML = `
+      <span class="toast-dot ${kind}"></span>
+      <div>
+        <div class="toast-t">${esc(title)}</div>
+        ${msg ? `<div class="toast-m">${esc(msg)}</div>` : ``}
+      </div>
+      <button class="toast-x" aria-label="close">×</button>
+    `;
+    el.querySelector(".toast-x").onclick = () => el.remove();
+    wrap.appendChild(el);
+    setTimeout(() => el.isConnected && el.remove(), 4200);
+  }
+
+  async function api(path, { method="GET", body=null } = {}, authed=false){
+    const headers = { "Content-Type":"application/json" };
+    if (authed){
+      if (!state.token) throw new Error("No token. Inicia sesión.");
+      headers.Authorization = "Bearer " + state.token;
+    }
+    const res = await fetch(BASE + path, { method, headers, body: body ? JSON.stringify(body) : null });
+    const text = await res.text();
+    let json=null; try{ json=text?JSON.parse(text):null }catch{}
+    if (!res.ok){
+      const msg = (json && (json.error || json.message)) ? (json.error || json.message) : (text || res.statusText);
+      throw new Error(msg);
+    }
+    return json;
+  }
+
+  function iconForCategory(cat){
+    const c = (cat || "").toLowerCase();
+    if (c.includes("health")) return ["health_and_safety", "var(--md-sys-color-tertiary)"];
+    if (c.includes("education")) return ["school", "var(--md-sys-color-primary)"];
+    if (c.includes("sustain")) return ["recycling", "var(--md-sys-color-tertiary)"];
+    if (c.includes("environment")) return ["public", "var(--md-sys-color-tertiary)"];
+    if (c.includes("safety")) return ["shield", "var(--md-sys-color-primary)"];
+    if (c.includes("housing")) return ["home", "var(--md-sys-color-primary)"];
+    if (c.includes("access")) return ["accessible", "var(--md-sys-color-primary)"];
+    return ["topic", "var(--md-sys-color-secondary)"];
+  }
+
+  function setSessionUI(){
+    const has = !!state.token;
+    $("btnLogout").style.display = has ? "" : "none";
+    $("sessionInfo").style.display = has ? "" : "none";
+    $("meMeta").textContent = has ? "Autenticado" : "No autenticado";
+
+    if (has){
+      const short = state.userId ? (state.userId.slice(0,8) + "…") : "usuario";
+      $("sessionText").textContent = short;
+      $("avatar").textContent = (short[0] || "U").toUpperCase();
+      $("btnLoginOpen").style.display = "none";
+    } else {
+      $("btnLoginOpen").style.display = "";
+    }
+  }
+
+  function renderProblems(){
+    const list = $("problemsList");
+    list.innerHTML = "";
+    if (!state.problems.length){
+      list.innerHTML = `<div class="hint">No hay resultados. Intenta con otros filtros.</div>`;
+      return;
+    }
+    for (const p of state.problems){
+      const my = state.matches.get(p.id);
+      const [ic, color] = iconForCategory(p.category);
+      const iconBg = `background: color-mix(in srgb, ${color} 10%, white); border-color: color-mix(in srgb, ${color} 20%, white);`;
+      const iconColor = `color: ${color};`;
+
+      const el = document.createElement("div");
+      el.className = "card";
+      el.innerHTML = `
+        <div class="ic" style="${iconBg}">
+          <span class="material-symbols-rounded" style="${iconColor}">${esc(ic)}</span>
+        </div>
+
+        <div class="card-main">
+          <div class="title">${esc(p.title)}</div>
+          <div class="desc">${esc(p.description || "").slice(0, 220)}${(p.description||"").length>220?"…":""}</div>
+
+          <div class="chips">
+            <span class="chip"><span class="material-symbols-rounded">sell</span>${esc(p.category)}</span>
+            <span class="chip"><span class="material-symbols-rounded">place</span>${esc(p.location)}</span>
+            <span class="chip"><span class="material-symbols-rounded">public</span>${esc(p.country_code || "—")}</span>
+            ${my ? `<span class="chip"><span class="material-symbols-rounded">person</span>Yo: ${esc(my.role)}</span>` : ``}
+          </div>
+        </div>
+
+        <div class="card-actions">
+          <md-outlined-button data-users>
+            <span class="material-symbols-rounded" slot="icon">group</span>
+            Ver usuarios
+          </md-outlined-button>
+
+          <md-filled-tonal-button data-solver>
+            <span class="material-symbols-rounded" slot="icon">volunteer_activism</span>
+            Match SOLVER
+          </md-filled-tonal-button>
+
+          <md-filled-tonal-button data-aff>
+            <span class="material-symbols-rounded" slot="icon">person_alert</span>
+            Match AFFECTED
+          </md-filled-tonal-button>
+
+          <md-text-button data-unmatch>
+            <span class="material-symbols-rounded" slot="icon">link_off</span>
+            Unmatch
+          </md-text-button>
+        </div>
+      `;
+
+      el.querySelector("[data-users]").onclick = () => loadCollaborators(p.id);
+      el.querySelector("[data-solver]").onclick = () => match(p.id, "SOLVER", p.title);
+      el.querySelector("[data-aff]").onclick = () => match(p.id, "AFFECTED", p.title);
+      el.querySelector("[data-unmatch]").onclick = () => unmatch(p.id, p.title);
+
+      list.appendChild(el);
+    }
+  }
+
+  async function loadProblems(){
+    $("resultsMeta").textContent = "Cargando…";
+    const search = $("qSearch").value?.trim() || "";
+    const category = $("qCategory").value?.trim() || "";
+    const location = $("qLocation").value?.trim() || "";
+    const country = ($("qCountry").value || "").trim().toUpperCase();
+
+    const qp = new URLSearchParams();
+    if (search) qp.set("search", search);
+    if (category) qp.set("category", category);
+    if (location) qp.set("location", location);
+    if (country) qp.set("country_code", country);
+
+    try{
+      const data = await api("/problems" + (qp.toString() ? ("?" + qp.toString()) : ""));
+      state.problems = data.items || [];
+      $("resultsMeta").textContent = `${state.problems.length} resultados`;
+      renderProblems();
+    } catch (e){
+      $("resultsMeta").textContent = "Error";
+      $("problemsList").innerHTML = `<div class="hint">Error cargando problemas: ${esc(e.message)}</div>`;
+      toast("bad", "Error", e.message);
+    }
+  }
+
+  function renderMatches(){
+    const list = $("myMatchesList");
+    list.innerHTML = "";
+
+    if (!state.token){
+      list.innerHTML = `<div class="hint">Inicia sesión para ver tus matches.</div>`;
+      return;
+    }
+
+    const items = Array.from(state.matches.values());
+    if (!items.length){
+      list.innerHTML = `<div class="hint">Aún no tienes matches.</div>`;
+      return;
+    }
+
+    for (const m of items){
+      const p = m.problem;
+      const [ic, color] = iconForCategory(p.category);
+      const iconBg = `background: color-mix(in srgb, ${color} 10%, white); border-color: color-mix(in srgb, ${color} 20%, white);`;
+      const iconColor = `color: ${color};`;
+
+      const el = document.createElement("div");
+      el.className = "card";
+      el.innerHTML = `
+        <div class="ic" style="${iconBg}">
+          <span class="material-symbols-rounded" style="${iconColor}">${esc(ic)}</span>
+        </div>
+
+        <div class="card-main">
+          <div class="title">${esc(p.title)}</div>
+          <div class="chips">
+            <span class="chip"><span class="material-symbols-rounded">person</span>${esc(m.role)}</span>
+            <span class="chip"><span class="material-symbols-rounded">schedule</span>${esc(m.matched_at).slice(0,19).replace("T"," ")}</span>
+          </div>
+          <div class="desc">${esc(p.location)} · ${esc(p.category)}</div>
+
+          <div class="match-actions-row">
+            <md-outlined-button data-users>
+              <span class="material-symbols-rounded" slot="icon">group</span>
+              Ver usuarios
+            </md-outlined-button>
+
+            <md-outlined-button class="unmatch-soft" data-unmatch>
+              <span class="material-symbols-rounded" slot="icon">link_off</span>
+              Unmatch
+            </md-outlined-button>
+          </div>
+        </div>
+      `;
+el.querySelector("[data-users]").onclick = () => loadCollaborators(p.id);
+      el.querySelector("[data-unmatch]").onclick = () => unmatch(p.id, p.title);
+
+      list.appendChild(el);
+    }
+  }
+
+  async function loadMyMatches(){
+    if (!state.token){
+      state.matches.clear();
+      renderMatches();
+      return;
+    }
+    try{
+      const data = await api("/me/matches?limit=300", {}, true);
+      state.matches.clear();
+      for (const r of (data.items || [])){
+        state.matches.set(r.problem.id, { role: r.role, matched_at: r.matched_at, problem: r.problem });
+      }
+      renderMatches();
+      renderProblems();
+    } catch (e){
+      toast("bad", "Error", e.message);
+    }
+  }
+
+  async function loadCollaborators(problemId){
+    $("collabMeta").textContent = "Cargando…";
+    const list = $("collabList");
+    list.innerHTML = "";
+
+    try{
+      const data = await api(`/problems/${problemId}/users`);
+      const items = data.items || [];
+      $("collabMeta").textContent = `${items.length} usuarios`;
+
+      if (!items.length){
+        list.innerHTML = `<div class="hint">No hay usuarios matcheados a este problema.</div>`;
+        return;
+      }
+
+      for (const r of items){
+        const el = document.createElement("div");
+        el.className = "card";
+        el.innerHTML = `
+          <div class="ic" style="background: rgba(95,99,104,.08); border-color: rgba(95,99,104,.18);">
+            <span class="material-symbols-rounded" style="color: rgba(95,99,104,.9);">person</span>
+          </div>
+          <div class="card-main">
+            <div class="title">${esc(r.user?.display_name || "Unnamed")}</div>
+            <div class="desc mono">${esc(r.user?.id || "")}</div>
+            <div class="chips">
+              <span class="chip"><span class="material-symbols-rounded">badge</span>${esc(r.role || "")}</span>
+              <span class="chip"><span class="material-symbols-rounded">schedule</span>${esc(r.matched_at || "").slice(0,19).replace("T"," ")}</span>
+            </div>
+          </div>
+        `;
+        list.appendChild(el);
+      }
+    } catch (e){
+      $("collabMeta").textContent = "Error";
+      list.innerHTML = `<div class="hint">Error: ${esc(e.message)}</div>`;
+      toast("bad", "Error", e.message);
+    }
+  }
+
+  async function match(problemId, role, title){
+    try{
+      await api(`/problems/${problemId}/match`, { method:"POST", body:{ role } }, true);
+      toast("ok", "Matched ✅", `${title} · ${role}`);
+      await loadMyMatches();
+    } catch (e){
+      toast("bad", "No se pudo matchear", e.message);
+    }
+  }
+
+  async function unmatch(problemId, title){
+    try{
+      await api(`/problems/${problemId}/match`, { method:"DELETE" }, true);
+      toast("ok", "Unmatch", title);
+      await loadMyMatches();
+    } catch (e){
+      toast("bad", "No se pudo desmatchear", e.message);
+    }
+  }
+
+  async function doLogin(){
+    const uuid = $("loginUuid").value?.trim();
+    if (!uuid) return toast("bad", "Falta UUID", "Ingresa un UUID válido.");
+    try{
+      const data = await api("/login", { method:"POST", body:{ userId: uuid } });
+      state.token = data.token || "";
+      state.userId = data.user?.id || uuid;
+      localStorage.setItem(LS_TOKEN, state.token);
+      localStorage.setItem(LS_UID, state.userId);
+      $("loginDialog").close();
+      setSessionUI();
+      toast("ok", "Login exitoso", data.user?.display_name || (state.userId.slice(0,8)+"…"));
+      await loadMyMatches();
+    } catch (e){
+      toast("bad", "Login falló", e.message);
+    }
+  }
+
+  function doLogout(){
+    state.token = "";
+    state.userId = "";
+    localStorage.removeItem(LS_TOKEN);
+    localStorage.removeItem(LS_UID);
+    state.matches.clear();
+    setSessionUI();
+    renderMatches();
+    renderProblems();
+    toast("ok", "Sesión cerrada", "Token eliminado.");
+  }
+
+  // Events
+  $("btnSearch").onclick = () => loadProblems();
+  $("btnClear").onclick = () => { $("qSearch").value=""; $("qCategory").value=""; $("qLocation").value=""; $("qCountry").value=""; loadProblems(); };
+  $("btnRefreshMatches").onclick = () => loadMyMatches();
+  $("btnLoginOpen").onclick = () => $("loginDialog").show();
+  $("btnLoginCancel").onclick = () => $("loginDialog").close();
+  $("btnLoginSubmit").onclick = () => doLogin();
+  $("btnLogout").onclick = () => doLogout();
+
+  ["qSearch","qCategory","qLocation","qCountry"].forEach(id => {
+    $(id).addEventListener("keydown", (e) => { if (e.key === "Enter") loadProblems(); });
+  });
+
+  (async function init(){
+    setSessionUI();
+    await loadProblems();
+    await loadMyMatches();
+  })();
+</script>
 </body>
-
 </html>
